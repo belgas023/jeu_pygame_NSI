@@ -20,7 +20,7 @@ def changerEtat(a): # changer l'etat actuel par a
     global etat_actuel
     etat_actuel = etat[etat.index(a)]
     
-def lanceD(Ds:list):
+def lanceD(Ds:list) -> list:
     res = []
     for i in Ds:
         res.append(i.roll())
@@ -43,8 +43,9 @@ class Joueur():
         self.sac_a_d[d1.name] = d1.liste_faces
         self.sac_a_d[d2.name] = d1.liste_faces
 
-        
-        
+    def ajout_D(self, d):
+        self.sac_a_d[d.name] = d.liste_faces
+
 class Monstre():
     
     def __init__(self, pv, atq, vitesse):
@@ -69,7 +70,7 @@ class D():
     
     def print_faces(self):
         print(f'nom: {self.name}')
-        print(f'indices: {[i for i in range(self.nbr_faces)]}')
+        print(f'indices: { [i for i in range(self.nbr_faces)] }')
         print(f'faces:   {self.liste_faces}')
                            
     def set_faces(self, indice, face):
@@ -80,20 +81,14 @@ class D():
         
     def pipé(self):
         self.pipé = True
+        #todo
         
 
-sac = [D(randint(4,10)) for i in range(5)]
-print(sac)
-print(lanceD(sac))
 
-a = Joueur()
 
-print(a.sac_a_d)
 
 while running:
- 
- 
- 
+    # main code
     pygame.display.update()    
     
     for event in pygame.event.get():
