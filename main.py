@@ -77,7 +77,7 @@ class Joueur():
         self.doigts = 10
         self.bagues = 0
         self.sac_a_d = {}
-        self.vitesse = randint(10, 15)
+        self.defense = randint(10, 15)
         
         #init sac a d
         d1 = D(6)
@@ -93,11 +93,11 @@ class Joueur():
 
 class Monstre():
     
-    def __init__(self, pv, atq, vitesse):
+    def __init__(self, pv, atq, defense):
         self.pv = pv
         self.atq = atq
         self.etat = None
-        self.vitesse = vitesse # pour comparaison: joueur a vitesse entre 10 et 15
+        self.defense = defense # pour comparaison: joueur a defense entre 10 et 15
     
 
 class D():
@@ -108,6 +108,7 @@ class D():
         self.pipé = False
         if liste_faces == None: # si liste de faces non déclaré, creer dé a x nombre de faces
             self.liste_faces = [i for i in range(nbr_faces)]
+            self.name = f'D{self.nbr_faces}'
         else: # sinon liste de faces = liste de faces déclarées
             self.liste_faces = liste_faces                 
         
@@ -131,7 +132,8 @@ class D():
         
 
 def attaque(auteur, cible):
-    pass
+    return sum(lanceD(auteur.sac_a_d))
+    
 
 def sysCombat(player, liste_ennemies): #args: joueur, liste des objets de type ennmies
     # entity = [i+1 for i in range(liste_ennemies+1)]
@@ -173,14 +175,14 @@ def sysCombat(player, liste_ennemies): #args: joueur, liste des objets de type e
     return gagne # return True si combat gagné,
     
     
-        
-tux = Monstre(40, 20, 15)
-angry_tux = Monstre(45, 40, 10)
+#                     pv atq  def
+tux =         Monstre(40, 20, 15)
+angry_tux =   Monstre(45, 40, 10)
 machete_tux = Monstre(40, 50, 10)
 
-linus = Monstre(300, 70, 20)
+linus =       Monstre(300, 70, 20)
 angry_linus = Monstre(300, 100, 20)
-affronte_mon_regard_linus = Monstre(1000, 200, 100) # boss final (impossible)
+dark_linus =  Monstre(1000, 200, 100) # boss final (impossible)
 
 while running:
     pygame.display.update()
@@ -217,6 +219,7 @@ while running:
         fenetre.blit(menu_a, (375,550))
         fenetre.blit(menu_b, (625,550))
         fenetre.blit(menu_c, (500,450))
+        
         if marque == 0 : 
             fenetre.blit(light, (500,450))
         if marque == 1 : 
