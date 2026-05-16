@@ -11,33 +11,30 @@ perso = pygame.image.load("assets/ours.png").convert_alpha() #taille de l image 
 ennemi = pygame.image.load("assets/Superpingouin.png").convert_alpha() #taille de l image 250, 250
 slot = pygame.image.load("assets/carre.png").convert_alpha() #taille de l image 60, 60
 item = pygame.image.load("assets/epee.png").convert_alpha() # taille de l image 45, 45
-main = pygame.image.load("assets/epee_grand.png").convert_alpha()
-secret = pygame.image.load("assets/Marchand.png").convert_alpha()
+epeeBois = pygame.image.load("assets/epee_grand.png").convert_alpha()
+marchandImage = pygame.image.load("assets/Marchand.png").convert_alpha()
 sell = pygame.image.load("assets/galerie.png").convert_alpha() #taille de l image
 poudre = pygame.image.load("assets/Blanc.png").convert_alpha()
-menu_c = pygame.image.load("assets/losange_c.png").convert_alpha()
-menu_a = pygame.image.load("assets/losange_a.png").convert_alpha()
-menu_b = pygame.image.load("assets/losange_b.png").convert_alpha()
-menu_r = pygame.image.load("assets/losange_r.png").convert_alpha()
+menu_c = pygame.image.load("assets/losange_c.png").convert_alpha() # menu combat (up) 
+menu_a = pygame.image.load("assets/losange_a.png").convert_alpha() # menu anneau (left)
+menu_b = pygame.image.load("assets/losange_b.png").convert_alpha() # menu bag (right) 
+menu_r = pygame.image.load("assets/losange_r.png").convert_alpha() # menu return (down)
 light = pygame.image.load("assets/Light.png").convert_alpha()
-gabe = pygame.image.load("assets/gabe.webp").convert_alpha()
+gabeImage = pygame.image.load("assets/gabe.webp").convert_alpha()
 
 fontGoth = pygame.font.Font('ManuskriptGotisch.ttf', 100)
 
 running = True
+debugMod = False
 
 slot_liste = [60, 140, 220, 300]
-marchand = False
-gabe_n = False
 br = 0
-marque = 0
-running = True
+selected = 'up'
 #dictionaire des objets present dans le jeux organiser comme sa :
 #[prix, description, sur quoi sa influe (pv, nombre de des...), nombre du changement de valeur, nom de l image, 1 si un anneau 0 sinon]
 objet = {"poudre_i": [50, "Une poudre mysterieuse conferant de grand pouvoir", "pv", 30, poudre, 0]}
 
-def font():
-        fenetre.blit(secret, (450, 180))
+def dosCarte():
         fenetre.blit(sell, (250, 525))    
         fenetre.blit(sell, (500, 525))    
         fenetre.blit(sell, (750, 525))
@@ -50,24 +47,84 @@ def utiliser(nom):
         gamer.nbr_d += objet[nom][3]
 
 etat = [
-    'menu-depart', # menu principal
+    'menuDepart', # menu principal
     'combat', 
     'maison', # amelioration des dés
-    'jardin'  # upgrades permanentes joueur 
+    'jardin',  # upgrades permanentes joueur 
+    'gabe',
+    'marché'
         ]
 etat_actuel = etat[0]
 
 def changerEtat(a): # changer l'etat actuel par a
     global etat_actuel
     etat_actuel = etat[etat.index(a)]
-    
-def lanceD(Ds:list) -> list:
-    res = []
-    for i in Ds:
-        res.append(i.roll())
-    return res
-        
 
+def run(state):
+    globals()[state]()
+
+# tout les etats:
+def marché():
+    """
+    ETAT
+    tableau avec le marchand
+    """
+    fenetre.blit(fond, (100,0))
+    dosCarte()
+    fenetre.blit(marchandImage, (450, 180))
+
+def gabe():
+    """
+    ETAT
+    tableau avec holy gabe
+    """
+    fenetre.blit(fond, (100,0))
+    fenetre.blit(gabeImage, (500, 180))
+    
+def menuDepart():
+    global br
+    fenetre.blit(fond, (100,0))
+    fenetre.blit(ennemi, (750,280))
+    fenetre.blit(epeeBois, (360,480))
+    # animation idle de l'ours
+    if br > 100:
+        fenetre.blit(perso, (150,310))
+        br += 1
+    elif br <= 100:
+        fenetre.blit(perso, (150,313))
+        br += 1
+    if br == 200:
+        br = 0
+
+    hud()
+
+def debug():
+    txtEtat = fontGoth.render(etat_actuel, True, (255, 255, 255))
+    fenetre.blit(txtEtat,(0,0))
+
+def hud():
+    global selected
+    fenetre.blit(menu_r, (500,650))
+    fenetre.blit(menu_a, (375,550))
+    fenetre.blit(menu_b, (625,550))
+    fenetre.blit(menu_c, (500,450))
+    for c in slot_liste:
+        fenetre.blit(slot, (25,c))
+    # menu surbrillance
+    if keys[pygame.K_UP] or selected == 'up':
+        selected = 'up'
+        fenetre.blit(light, (500,450))
+    if keys[pygame.K_LEFT] or selected == 'left':
+        selected = 'left'
+        fenetre.blit(light, (375,550))     
+    if keys[pygame.K_RIGHT] or selected == 'right':
+        selected = 'right'
+        fenetre.blit(light, (625,550))
+    if keys[pygame.K_DOWN] or selected == 'down':
+        selected = 'down'
+        fenetre.blit(light, (500,650))      
+   
+       
 class Joueur():
     
     def __init__(self):
@@ -129,6 +186,16 @@ class D():
     def pipé(self):
         self.pipé = True
         #todo
+
+def lanceD(Ds:list) -> list:
+    """
+    args: liste de dés
+    renvoie: liste des resultats des dés
+    """
+    res = []
+    for i in Ds:
+        res.append(i.roll())
+    return res
         
 
 def attaque(auteur, cible):
@@ -175,6 +242,7 @@ def sysCombat(player, liste_ennemies): #args: joueur, liste des objets de type e
     return gagne # return True si combat gagné,
     
     
+#     Bestiaire
 #                     pv atq  def
 tux =         Monstre(40, 20, 15)
 angry_tux =   Monstre(45, 40, 10)
@@ -184,79 +252,28 @@ linus =       Monstre(300, 70, 20)
 angry_linus = Monstre(300, 100, 20)
 dark_linus =  Monstre(1000, 200, 100) # boss final (impossible)
 
+
+
+# boucle principale
 while running:
     pygame.display.update()
-    
-    # main code
-    
     keys = pygame.key.get_pressed()
+
     fenetre.blit(noir, (0,0))
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-    fenetre.blit(fond, (100,0))
+   
+    run(etat_actuel)
 
-    if marchand == True:
-        font()
-    
-    elif gabe_n == True:
-        fenetre.blit(gabe, (500, 180))
-    
-    else:
-        if br > 100:
-            fenetre.blit(perso, (150,310))
-            br += 1
-        elif br <= 100:
-            fenetre.blit(perso, (150,313))
-            br += 1
-        if br == 200:
-            br = 0
-        
-        fenetre.blit(ennemi, (750,280))
-        fenetre.blit(main, (360,480))
-        fenetre.blit(menu_r, (500,650))
-        fenetre.blit(menu_a, (375,550))
-        fenetre.blit(menu_b, (625,550))
-        fenetre.blit(menu_c, (500,450))
-        
-        if marque == 0 : 
-            fenetre.blit(light, (500,450))
-        if marque == 1 : 
-            fenetre.blit(light, (375,550))     
-        if marque == 2 : 
-            fenetre.blit(light, (625,550))
-        if marque == 3 : 
-            fenetre.blit(light, (500,650))      
-        
-        if keys[pygame.K_UP]:
-            marque = 0
-        
-        if keys[pygame.K_LEFT]:
-            marque = 1
-        
-        if keys[pygame.K_RIGHT]:
-            marque = 2
-            
-        if keys[pygame.K_DOWN]:
-            marque = 3     
-            
-    for c in slot_liste:
-        fenetre.blit(slot, (25,c))
-    
+    #debug mod
+    if keys[pygame.K_d] :
+        debug()
+
     if keys[pygame.K_m]:
-        marchand = True
-        gabe_n = False
-    
+        changerEtat('marché')
     if keys[pygame.K_l]:
-        marchand = False
-        gabe_n = False
-
+        changerEtat('menuDepart')
     if keys[pygame.K_g]:
-        gabe_n = True
-        marchand = False
-    
-      
+        changerEtat('gabe')
+     
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
